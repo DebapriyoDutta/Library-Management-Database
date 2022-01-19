@@ -1,0 +1,236 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+void insrec();
+void disrec();
+void delrec();
+void updrec();
+void serrec();
+
+struct library
+{
+    int bid;
+    char bname[30];
+    char bauth[30];
+    char dtpub[30];
+    float price;
+};
+    struct library l;
+
+void main()
+{
+    int ch;
+    
+    while(ch!=7)
+    {
+        printf("\n\n\t\t\t\t\t\t----------LIBRARY RECORD DATABASE----------");
+        
+        printf("\n\n\t\t\t\t\t\t********AVAILABLE TASKS*********");
+        printf("\n\t\t\t\t PRESS 1 TO INSERT DATA");
+        printf("\n\t\t\t\t PRESS 2 TO DISPLAY DATA");
+        printf("\n\t\t\t\t PRESS 3 TO SEARCH DATA");
+        printf("\n\t\t\t\t PRESS 4 TO DELETE DATA");
+        printf("\n\t\t\t\t PRESS 5 TO UPDATE DATA");
+        printf("\n\t\t\t\t PRESS 6 TO EXIT LIBRARY RECORD DATABASE");
+        printf("\n\t\t\t\t Enter your choice: ");
+        scanf("%d",&ch);
+            
+            switch(ch)
+            {
+                case 1:
+                    insrec();
+                    break;
+                case 2:
+                    disrec();
+                    break;
+                case 3: 
+                    serrec();
+                    break;
+                case 4: 
+                    delrec();
+                    break;
+                case 5: 
+                    updrec();
+                    break;
+                case 6:
+                    exit(1);
+                        
+                default:
+            printf("\n\tWrong choice entered");
+                        
+            }
+    }
+}
+
+void insrec()
+{
+    FILE *fp;
+    fp=fopen("lib.txt","a+");
+    
+    if(fp==NULL)
+    {
+        printf("File not found");
+        return;
+    }
+    printf("\n\tPreviously stored records in database");
+    printf("\n\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    disrec();
+    
+    printf("\n\t*****ENTER NEW RECORD*****");
+    printf("\n\tEnter Book's ID: ");
+    scanf("%d",&l.bid);
+    printf("\n\tEnter Book's name: ");
+    scanf("%s",l.bname);
+    printf("\n\tEnter Book's Author: ");
+    scanf("%s",l.bauth);
+    printf("\n\tEnter the Book's Date of publication: ");
+    scanf("%s",l.dtpub);
+    printf("\n\tEnter the Book's Price: ");
+    scanf("%f",&l.price);
+    fwrite(&l,sizeof(l),1,fp);
+    
+    printf("\n\tRECORD INSERTED SUCCESSFULLY!\n");
+    fclose(fp);
+    printf("\n\tUpdated list of records:");
+    printf("\n\t~~~~~~~~~~~~~~~~~~~~~~~~");
+    disrec();
+}
+
+void disrec()
+{
+    FILE *fp;
+    fp=fopen("lib.txt","r");
+    
+    if(fp==NULL)
+    {
+        printf("File not found.Please try again");
+        return;
+    }
+    printf("\n\n\tRECORDS IN DATABASE:");
+    printf("\n\t\tBook ID\t\tBook Name\tAuthor\t\tDate of Publication\tPrice");
+    //printf("\nBook IDBook NameAuthorDate of Publication");
+    printf("\n\t\t_______________________________________________________________________\n\n");
+    while(fread(&l,sizeof(l),1,fp)==1)
+    {
+        printf("\t\t%d\t\t%s\t\t%s\t\t%s\t\t%0.2f\n",l.bid,l.bname,l.bauth,l.dtpub,l.price);
+        //printf("%d%s%s%s\n",l.bid,l.bname,l.bauth,l.dtpub);
+    }
+    fclose(fp);
+}
+
+void serrec()
+{
+    int r,flag=0;
+    FILE *fp;
+    fp=fopen("lib.txt","r");
+    
+    if(fp==NULL)
+    {
+        printf("\n\tFile not found");
+        return;
+    }
+    printf("\n\tEnter Book's ID which you want to find: ");
+    scanf("%d",&r);
+    while(fread(&l,sizeof(l),1,fp)>0 && flag==0)
+    {
+        if (l.bid==r)
+        {
+            flag=1;
+            printf("\n\tSEARCH SUCCESSFUL");
+            printf("\n\t\tBook ID\t\tBook Name\tAuthor\t\tDate of Publication\tPrice");
+            printf("\n\t\t_____________________________________________________________________\n\n");
+            printf("\t\t%d\t\t%s\t\t%s\t\t%s\t\t%0.2f\n",l.bid,l.bname,l.bauth,l.dtpub,l.price);
+        }
+    }
+    if(flag==0)
+    {
+    printf("\n\tRECORD NOT FOUND. PLEASE TRY AGAIN!!\n");
+    }
+fclose(fp);
+}
+
+void delrec()
+{
+    int r,flag=0;
+    FILE *fp,*ft;
+    fp=fopen("lib.txt","r");
+    
+    if(fp==NULL)
+    {
+        printf("\n\tFile not found");
+        return;
+    }
+    printf("\n\t Previously stored records in database");
+    printf("\n\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    disrec();
+    printf("\n\tENTER THE ID OF THE BOOK YOU WANT TO DELETE: ");
+    scanf("%d",&r);
+    
+    ft=fopen("lib1.txt","a+");
+    while(fread(&l,sizeof(l),1,fp)==1)
+    {
+        if(l.bid!=r)
+        {
+            fwrite(&l,sizeof(l),1,ft);
+        }
+        else
+            flag=1;
+    }
+    if(flag==0)
+    {
+        printf("\n\tNO SUCH RECORD FOUND. PLEASE TRY AGAIN!!.");
+    }
+    else
+        printf("\n\tRECORD DELETED SUCCESSFULLY!");
+    fclose(fp);
+    fclose(ft);
+    remove("lib.txt");
+    rename("lib1.txt","lib.txt");
+}
+
+void updrec()
+{
+    int r,flag=0;
+    FILE *fp;
+    fp=fopen("lib.txt","r+");
+    
+    if(fp==NULL)
+    {
+        printf("File not found");
+        return;
+    }
+    printf("\n\tENTER BOOK'S ID WHICH YOU WANT TO UPDATE: ");
+    scanf("%d",&r);
+    
+    while(fread(&l,sizeof(l),1,fp)>0 && flag==0)
+    {
+        if (l.bid==r)
+        {
+            flag=1;
+            printf("\n\t***PREVIOUSLY STORED DATA OF GIVEN ROLL NUMBER***");
+            printf("\n\t\tBook ID\t\tBook Name\tAuthor\t\tDate of Publication\tPrice");
+            printf("\n\t\t________________________________________________________________\n\n");
+            printf("\t\t%d\t\t%s\t\t%s\t\t%s\t\t%0.2f\n",l.bid,l.bname,l.bauth,l.dtpub,l.price);
+            
+            printf("\n\tNOW ENTER UPDATED DATA: ");
+            printf("\n\tEnter updated Book's ID: ");
+            scanf("%d",&l.bid);
+            printf("\n\tEnter updated Book's name: ");
+            scanf("%s",l.bname);
+            printf("\n\tEnter updated Book's Author: ");
+            scanf("%s",l.bauth);
+            printf("\n\tEnter updated Book's Date of publication: ");
+            scanf("%s",l.dtpub);
+            printf("\n\tEnter updated Book's Price: ");
+            scanf("%f",&l.price);
+            fseek(fp,-(long)sizeof(l),1);
+            fwrite(&l,sizeof(l),1,fp);
+            printf("\n\tRECORD UPDATED SUCCESSFULLY!");
+        }
+    }
+    if(flag==0)
+    {
+        printf("\n\tNO SUCH RECORD FOUND. PLEASE TRY AGAIN!!");
+    }
+fclose(fp);
+}
